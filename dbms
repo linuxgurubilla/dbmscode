@@ -1,0 +1,605 @@
+-- ============================================================================
+-- DBMS LAB - CORRECTED MySQL CODE (Ex. 1 to 12)
+-- Tested for MySQL 8.0+ (MySQL Workbench / mysql command-line client)
+--
+-- HOW TO USE
+--  * Every exercise is INDEPENDENT: it drops and re-creates its own database,
+--    so you can run the whole file, or select one exercise and "Run Selection".
+--  * Run as root (Ex. 11a needs admin rights).
+--  * Exercises 9, 10, 12 use DELIMITER. Works in Workbench and the command-line
+--    client. Online SQL playgrounds usually do NOT support DELIMITER.
+-- ============================================================================
+
+SET SQL_SAFE_UPDATES = 0;   -- lets UPDATE/DELETE run without a key in WHERE
+
+
+-- ############################################################################
+-- EX. NO: 1   DDL COMMANDS
+-- ############################################################################
+DROP DATABASE IF EXISTS a;
+CREATE DATABASE a;
+USE a;
+
+CREATE TABLE stud (sname VARCHAR(30), sid VARCHAR(10), sage INTEGER, sarea VARCHAR(20));
+SHOW TABLES;
+DESC stud;
+
+-- ALTER: add column
+ALTER TABLE stud ADD phoneno INTEGER AFTER sage;
+DESC stud;
+
+-- ALTER: change datatype
+ALTER TABLE stud MODIFY sage VARCHAR(20);
+DESC stud;
+
+-- ALTER: drop column
+ALTER TABLE stud DROP COLUMN sage;
+DESC stud;
+
+-- TRUNCATE
+TRUNCATE TABLE stud;
+DESC stud;
+
+-- DROP
+DROP TABLE stud;
+-- DESC stud;   -- uncomment to see: ERROR 1146 (42S02): Table 'a.stud' doesn't exist
+SHOW TABLES;
+
+
+-- ############################################################################
+-- EX. NO: 2   DML COMMANDS
+-- ############################################################################
+DROP DATABASE IF EXISTS ex2;
+CREATE DATABASE ex2;
+USE ex2;
+
+CREATE TABLE student (sn CHAR(20), regno INTEGER, address VARCHAR(40));
+
+INSERT INTO student (sn, regno, address) VALUES ('shalini', 1001, 'second street,chennai-73');
+INSERT INTO student (sn, regno, address) VALUES ('vinosha', 1002, 'kurinji street,chennai-73');
+INSERT INTO student (sn, regno, address) VALUES ('bharani', 1003, 'First street,chennai-73');
+SELECT * FROM student;
+
+-- UPDATING THE TABLE
+ALTER TABLE student ADD sid INTEGER;
+UPDATE student SET sid = 1 WHERE regno = 1001;
+UPDATE student SET sid = 2 WHERE regno = 1002;
+UPDATE student SET sid = 3 WHERE regno = 1003;
+SELECT * FROM student;
+
+-- VIEW RECORDS BASED ON CONDITION
+SELECT * FROM student WHERE regno = 1001;
+SELECT * FROM student WHERE regno = 1001 OR sid = 2;
+SELECT * FROM student WHERE regno NOT IN (1001, 1002);
+
+-- DELETION
+DELETE FROM student WHERE sid = 1;
+SELECT * FROM student;
+
+
+-- ############################################################################
+-- EX. NO: 3A   WHERE CLAUSE CONDITIONS
+-- ############################################################################
+DROP DATABASE IF EXISTS ex3a;
+CREATE DATABASE ex3a;
+USE ex3a;
+
+CREATE TABLE student (rollno INTEGER, sname VARCHAR(20), marks INTEGER);
+SHOW TABLES;
+DESC student;
+
+INSERT INTO student VALUES (1001, 'yamini', 95), (1002, 'rose', 84), (1003, 'jennie', 96);
+SELECT * FROM student;
+
+SELECT sname, marks FROM student WHERE rollno = 1003;
+
+UPDATE student SET marks = 100 WHERE sname = 'yamini';
+SELECT * FROM student;
+
+DELETE FROM student WHERE rollno = 1003;
+SELECT * FROM student;
+
+-- WHERE with logical operators
+SELECT * FROM student WHERE rollno = 1001;
+SELECT * FROM student WHERE marks > 80 AND sname = 'rose';
+SELECT * FROM student WHERE rollno = 1001 OR marks = 84;
+SELECT * FROM student WHERE NOT rollno = 1001;
+
+-- WHERE with BETWEEN
+SELECT * FROM student WHERE marks BETWEEN 80 AND 90;
+
+-- WHERE with LIKE
+SELECT * FROM student WHERE sname LIKE 'r%';
+
+-- WHERE with IN
+SELECT * FROM student WHERE marks IN (84, 100);
+
+
+-- ############################################################################
+-- EX. NO: 3B   AGGREGATE FUNCTIONS
+-- (jennie's marks = 98 so that the outputs match the manual:
+--  sum 277, avg 92.3333, max 98, min 84)
+-- ############################################################################
+DROP DATABASE IF EXISTS ex3b;
+CREATE DATABASE ex3b;
+USE ex3b;
+
+CREATE TABLE student (rollno INTEGER, sname VARCHAR(20), marks INTEGER);
+SHOW TABLES;
+DESC student;
+
+INSERT INTO student VALUES (1001, 'yamini', 95), (1002, 'rose', 84), (1003, 'jennie', 98);
+SELECT * FROM student;
+
+SELECT COUNT(marks) FROM student;
+SELECT SUM(marks)   FROM student;
+SELECT AVG(marks)   FROM student;
+SELECT MAX(marks)   FROM student;
+SELECT MIN(marks)   FROM student;
+
+
+-- ############################################################################
+-- EX. NO: 4   OPERATORS IN SQL
+-- ############################################################################
+DROP DATABASE IF EXISTS ex4;
+CREATE DATABASE ex4;
+USE ex4;
+
+-- Arithmetic operators
+CREATE TABLE numbers (num1 INT, num2 INT);
+INSERT INTO numbers (num1, num2) VALUES (5, 10), (15, 20);
+
+SELECT num1, num2, num1 + num2 AS `sum`        FROM numbers;   -- 1. Addition
+SELECT num1, num2, num1 - num2 AS difference   FROM numbers;   -- 2. Subtraction
+SELECT num1, num2, num1 * num2 AS product      FROM numbers;   -- 3. Multiplication
+SELECT num1, num2, num1 / num2 AS quotient     FROM numbers;   -- 4. Division
+SELECT num1, num2, POW(num1, 2) AS power_of_2  FROM numbers;   -- 5. Power (in MySQL ^ is XOR, so use POW())
+SELECT num1, num2, num1 % num2 AS remainder    FROM numbers;   -- 6. Modulus
+
+-- Logical and comparison operators
+CREATE TABLE tecse (roll INT, name VARCHAR(20), dbms INT, java1 INT);
+INSERT INTO tecse VALUES
+  (1, 'KUMBHAR', 15, 25),
+  (2, 'MALI',    49, 45),
+  (3, 'SHELKE',  35, 22),
+  (4, 'THORAT',  50, 42),
+  (5, 'MORE',    45, 48);
+SELECT * FROM tecse;
+
+-- OR
+SELECT roll, name FROM tecse WHERE dbms > 30 OR java1 > 35;
+-- AND
+SELECT roll, name FROM tecse WHERE dbms > 30 AND java1 > 32;
+-- NOT
+SELECT roll, name FROM tecse WHERE NOT dbms > 30;
+
+-- Comparison operators
+SELECT roll, name, dbms FROM tecse WHERE dbms = 49;
+SELECT roll, name, dbms FROM tecse WHERE dbms != 49;
+SELECT roll, name, dbms FROM tecse WHERE dbms <> 49;
+SELECT roll, name, dbms FROM tecse WHERE dbms > 45;
+SELECT roll, name, dbms FROM tecse WHERE dbms < 35;
+SELECT roll, name, dbms FROM tecse WHERE dbms >= 45;
+SELECT roll, name, dbms FROM tecse WHERE dbms <= 35;
+
+
+-- ############################################################################
+-- EX. NO: 5   JOINS
+-- ############################################################################
+DROP DATABASE IF EXISTS ex5;
+CREATE DATABASE ex5;
+USE ex5;
+
+CREATE TABLE t1 (id INT PRIMARY KEY, pattern VARCHAR(50) NOT NULL);
+CREATE TABLE t2 (id VARCHAR(50) PRIMARY KEY, pattern VARCHAR(50) NOT NULL);
+
+INSERT INTO t1 VALUES (1, 'Divot'), (2, 'Brick'), (3, 'Grid');
+INSERT INTO t2 VALUES ('a', 'Brick'), ('b', 'Grid'), ('c', 'Diamond');
+
+SELECT * FROM t1;
+SELECT * FROM t2;
+
+-- CROSS JOIN
+SELECT t1.id, t2.id FROM t1 CROSS JOIN t2 ORDER BY t1.id, t2.id DESC;
+
+-- INNER JOIN
+SELECT t1.id, t2.id FROM t1 INNER JOIN t2 ON t1.pattern = t2.pattern ORDER BY t1.id;
+
+-- LEFT JOIN
+SELECT t1.id, t2.id FROM t1 LEFT JOIN t2 ON t1.pattern = t2.pattern ORDER BY t1.id;
+
+-- RIGHT JOIN
+SELECT t1.id, t2.id FROM t1 RIGHT JOIN t2 ON t1.pattern = t2.pattern ORDER BY t2.id;
+
+
+-- ############################################################################
+-- EX. NO: 6   SUB QUERIES
+-- (MySQL has no NUMBER / VARCHAR2 types, so INT / VARCHAR are used)
+-- ############################################################################
+DROP DATABASE IF EXISTS ex6;
+CREATE DATABASE ex6;
+USE ex6;
+
+CREATE TABLE sempls (
+  eno    INT PRIMARY KEY,
+  ename  VARCHAR(20),
+  edob   VARCHAR(15),
+  gender VARCHAR(10),
+  doj    VARCHAR(15),
+  desg   VARCHAR(30),
+  bpay   INT,
+  dno    INT
+);
+INSERT INTO sempls VALUES
+  (1, 'bala', '15/1/84', 'm', '16th july', 'lec',    7000,  1),
+  (2, 'kala', '13/9/84', 'm', '18th july', 'lec',    10000, 2),
+  (3, 'mala', '17/6/85', 'f', '19th june', 'lec',    19000, 1),
+  (4, 'nila', '20/6/85', 'f', '19th june', 'sr.lec', 20000, 1),
+  (5, 'vina', '2/1/85',  'f', '12th july', 'prof',   50000, 2);
+SELECT * FROM sempls;
+
+CREATE TABLE sdments (dno INT PRIMARY KEY, dname VARCHAR(30));
+INSERT INTO sdments VALUES (1, 'CSE'), (2, 'IT');
+SELECT * FROM sdments;
+
+CREATE TABLE spros (pno INT PRIMARY KEY, pname VARCHAR(30), dno INT);
+INSERT INTO spros VALUES (81, 'aaa', 1), (82, 'bbb', 1), (83, 'ccc', 1), (84, 'ddd', 2), (85, 'eee', 2);
+SELECT * FROM spros;
+
+CREATE TABLE sworks (eno INT, pno INT, datework VARCHAR(20), intime INT, outtime INT);
+INSERT INTO sworks VALUES
+  (1, 81, '11th july', 9,  10),
+  (1, 82, '11th july', 10, 11),
+  (1, 83, '11th july', 11, 12),
+  (1, 84, '11th july', 12, 1),
+  (1, 85, '11th july', 1,  2),
+  (2, 85, '12th july', 8,  9),
+  -- extra rows so that QUERY 4 returns employees 1, 3, 4 as shown in the manual
+  (3, 81, '13th july', 9,  10),
+  (4, 82, '13th july', 9,  10);
+SELECT * FROM sworks;
+
+-- QUERY 1: employees whose basic pay is less than the average basic pay
+SELECT * FROM sempls WHERE bpay < (SELECT AVG(bpay) FROM sempls);
+
+-- QUERY 2: department number and number of employees in each department
+SELECT dno,
+       (SELECT COUNT(*) FROM sempls e2 WHERE e2.dno = e1.dno) AS `COUNT(ENO)`
+FROM sempls e1
+GROUP BY dno;
+
+-- QUERY 3: employees with basic pay between 10000 and 20000
+SELECT * FROM sempls
+WHERE eno IN (SELECT eno FROM sempls WHERE bpay BETWEEN 10000 AND 20000);
+
+-- QUERY 4: employees who worked in projects controlled by department CSE
+SELECT * FROM sempls
+WHERE eno IN (SELECT eno FROM sworks
+              WHERE pno IN (SELECT pno FROM spros
+                            WHERE dno = (SELECT dno FROM sdments WHERE dname = 'cse')));
+
+-- QUERY 5: employees who worked in more than 4 projects on a day
+SELECT e.eno, e.ename, e.dno, d.datework
+FROM sempls e
+JOIN (SELECT eno, datework
+      FROM sworks
+      GROUP BY eno, datework
+      HAVING COUNT(pno) > 4) d ON e.eno = d.eno;
+
+
+-- ############################################################################
+-- EX. NO: 7   PATTERN MATCHING (LIKE and REGEXP)
+-- ############################################################################
+DROP DATABASE IF EXISTS ex7;
+CREATE DATABASE ex7;
+USE ex7;
+
+CREATE TABLE products (product_id INT AUTO_INCREMENT PRIMARY KEY, product_name VARCHAR(100));
+INSERT INTO products (product_name) VALUES
+  ('Apple iPhone 12'),
+  ('Samsung Galaxy S20'),
+  ('Google Pixel 5'),
+  ('Huawei P40 Pro'),
+  ('OnePlus 8T');
+SELECT * FROM products;
+
+-- LIKE operator
+SELECT * FROM products WHERE product_name LIKE 'S%';       -- starts with S
+
+-- REGEXP operator (names containing a digit: every product here has one)
+SELECT * FROM products WHERE product_name REGEXP '[0-9]';
+
+-- LIKE with % and _
+SELECT * FROM products WHERE product_name LIKE 'A%2';      -- starts with A, ends with 2
+SELECT * FROM products WHERE product_name LIKE '_a%';      -- second letter is a
+SELECT * FROM products WHERE product_name LIKE 'OnePlus _T';  -- exactly one char between 'OnePlus ' and 'T'
+
+-- More REGEXP
+SELECT * FROM products WHERE product_name REGEXP '^[A-G]'; -- starts with A to G
+SELECT * FROM products WHERE product_name REGEXP 'T$';     -- ends with T
+
+
+-- ############################################################################
+-- EX. NO: 8   CONSTRAINTS
+-- ############################################################################
+DROP DATABASE IF EXISTS ex8;
+CREATE DATABASE ex8;
+USE ex8;
+
+-- PRIMARY KEY
+CREATE TABLE cse1 (rollno INT PRIMARY KEY, name VARCHAR(20), city VARCHAR(20));
+DESC cse1;
+
+-- NOT NULL
+CREATE TABLE cse2 (rollno INT PRIMARY KEY, name VARCHAR(20) NOT NULL, city VARCHAR(20));
+DESC cse2;
+
+-- UNIQUE
+CREATE TABLE student (rollno INT UNIQUE, name VARCHAR(20), city VARCHAR(20));
+DESC student;
+
+-- UNIQUE + DEFAULT
+CREATE TABLE student1 (rollno INT UNIQUE, name VARCHAR(20), city VARCHAR(20), mark INT DEFAULT 40);
+DESC student1;
+INSERT INTO student1 (rollno, name, city) VALUES (1, 'arun', 'chennai');   -- mark becomes 40
+SELECT * FROM student1;
+
+-- CHECK (enforced in MySQL 8.0.16+)
+CREATE TABLE student2 (rollno INT, name VARCHAR(20), city VARCHAR(20), mark INT CHECK (mark >= 40));
+DESC student2;
+INSERT INTO student2 VALUES (1, 'arun', 'chennai', 50);                    -- OK
+SELECT * FROM student2;
+-- INSERT INTO student2 VALUES (2, 'ravi', 'madurai', 30);   -- uncomment: ERROR 3819 (check constraint violated)
+
+-- PRIMARY KEY and FOREIGN KEY
+CREATE TABLE dept (dno INT PRIMARY KEY, dname VARCHAR(20));
+DESC dept;
+
+CREATE TABLE student3 (
+  rollno INT PRIMARY KEY,
+  name   VARCHAR(20),
+  dno    INT,
+  FOREIGN KEY (dno) REFERENCES dept(dno)
+);
+DESC student3;
+
+INSERT INTO dept VALUES (1, 'CSE'), (2, 'IT');
+INSERT INTO student3 VALUES (101, 'arun', 1);                              -- OK
+SELECT * FROM student3;
+-- INSERT INTO student3 VALUES (102, 'ravi', 9);   -- uncomment: ERROR 1452 (foreign key fails, dept 9 does not exist)
+
+
+-- ############################################################################
+-- EX. NO: 9   USER DEFINED FUNCTIONS
+-- (The manual code is SQL Server / T-SQL. It does not run in MySQL.
+--  MySQL version below. MySQL has no table-valued functions, so those two
+--  are written as stored procedures that return a result set.)
+-- ############################################################################
+DROP DATABASE IF EXISTS ex9;
+CREATE DATABASE ex9;
+USE ex9;
+
+-- 1. Scalar user defined function
+DELIMITER $$
+CREATE FUNCTION SquareNumber(num INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+  RETURN num * num;
+END$$
+DELIMITER ;
+
+SELECT SquareNumber(5) AS Result;
+
+-- 2. "Table-valued" function  (procedure returning rows)
+CREATE TABLE Employees (EmployeeID INT PRIMARY KEY, Name VARCHAR(50), Salary DECIMAL(10,2));
+INSERT INTO Employees VALUES
+  (101, 'Ravi',  60000),
+  (102, 'Priya', 75000),
+  (103, 'Kumar', 45000),
+  (104, 'Anu',   30000);
+
+DELIMITER $$
+CREATE PROCEDURE GetHighPaidEmployees(IN min_salary DECIMAL(10,2))
+BEGIN
+  SELECT EmployeeID AS Emp_id, Name AS Emp_name, Salary
+  FROM Employees
+  WHERE Salary > min_salary;
+END$$
+DELIMITER ;
+
+CALL GetHighPaidEmployees(50000);
+
+-- 3. "Multi-statement table-valued function"  (procedure with loop)
+DELIMITER $$
+CREATE PROCEDURE GenerateSquares(IN max_number INT)
+BEGIN
+  DECLARE i INT DEFAULT 1;
+  DROP TEMPORARY TABLE IF EXISTS tmp_squares;
+  CREATE TEMPORARY TABLE tmp_squares (num INT, square INT);
+  WHILE i <= max_number DO
+    INSERT INTO tmp_squares (num, square) VALUES (i, i * i);
+    SET i = i + 1;
+  END WHILE;
+  SELECT num AS `NUMBER`, square AS `SQUARE` FROM tmp_squares;
+  DROP TEMPORARY TABLE tmp_squares;
+END$$
+DELIMITER ;
+
+CALL GenerateSquares(5);
+
+
+-- ############################################################################
+-- EX. NO: 10   STORED PROCEDURES AND FUNCTIONS
+-- ############################################################################
+DROP DATABASE IF EXISTS ex10;
+CREATE DATABASE ex10;
+USE ex10;
+
+CREATE TABLE item (itemid INT, actualprice INT, ordid INT, prodid INT);
+INSERT INTO item VALUES (101, 2500, 500, 201), (102, 3000, 1600, 202), (103, 4000, 600, 203);
+
+-- IN parameter
+SELECT * FROM item;
+DELIMITER //
+CREATE PROCEDURE func_in(IN a INT)
+BEGIN
+  SELECT actualprice FROM item WHERE itemid = a;
+END//
+DELIMITER ;
+CALL func_in(101);
+
+-- OUT parameter
+DELIMITER //
+CREATE PROCEDURE func_out(IN price INT, OUT total_count INT)
+BEGIN
+  SELECT COUNT(*) INTO total_count FROM item WHERE actualprice < price;
+END//
+DELIMITER ;
+CALL func_out(4000, @total_count);
+SELECT @total_count AS TotalCount;
+
+-- INOUT parameter
+DELIMITER //
+CREATE PROCEDURE func_inout(INOUT cnt INT, IN inc INT)
+BEGIN
+  SET cnt = cnt + inc;
+END//
+DELIMITER ;
+SET @counter = 1;
+CALL func_inout(@counter, 1);
+CALL func_inout(@counter, 1);
+CALL func_inout(@counter, 5);
+SELECT @counter AS Counter;
+
+-- FUNCTION
+CREATE TABLE it (id INT, name VARCHAR(20), dept INT);
+INSERT INTO it VALUES (101, 'xxx', 4021), (102, 'yyy', 4031), (103, 'zzz', 4021);
+SELECT * FROM it;
+
+DELIMITER //
+CREATE FUNCTION Hi(eid INT)
+RETURNS CHAR(40)
+DETERMINISTIC
+BEGIN
+  RETURN 'Super';
+END//
+DELIMITER ;
+SELECT dept, Hi(101) FROM it;
+
+
+-- ############################################################################
+-- EX. NO: 11a   DCL COMMANDS (GRANT / REVOKE)     -- run as root
+-- ############################################################################
+DROP DATABASE IF EXISTS company_db;
+DROP USER IF EXISTS 'john'@'localhost';
+
+-- Step 1: create database and table
+CREATE DATABASE company_db;
+USE company_db;
+CREATE TABLE employees (id INT PRIMARY KEY, name VARCHAR(100), department VARCHAR(100));
+
+-- Step 2: create user (stronger password, so it also works when password validation is on)
+CREATE USER 'john'@'localhost' IDENTIFIED BY 'Password@123';
+
+-- Step 3: GRANT permissions
+GRANT SELECT, INSERT ON company_db.employees TO 'john'@'localhost';
+SHOW GRANTS FOR 'john'@'localhost';
+
+-- Step 4: test as john
+--   Open a second connection:  mysql -u john -p      (password: Password@123)
+--   and run:
+--     SELECT * FROM company_db.employees;                                            -> Empty set
+--     INSERT INTO company_db.employees (id, name, department) VALUES (1,'Alice','HR'); -> Query OK
+--   For a single-window run, this row is inserted here as root instead:
+INSERT INTO company_db.employees (id, name, department) VALUES (1, 'Alice', 'HR');
+
+-- Step 5: REVOKE permission
+REVOKE INSERT ON company_db.employees FROM 'john'@'localhost';
+SHOW GRANTS FOR 'john'@'localhost';
+
+-- Step 6: test revoked access (in john's window)
+--     INSERT INTO company_db.employees (id, name, department) VALUES (2,'Bob','IT');
+--     -> ERROR 1142 (42000): INSERT command denied to user 'john'@'localhost' for table 'employees'
+SELECT * FROM company_db.employees;
+
+
+-- ############################################################################
+-- EX. NO: 11b   TCL COMMANDS (COMMIT / ROLLBACK / SAVEPOINT)
+-- ############################################################################
+DROP DATABASE IF EXISTS ex11b;
+CREATE DATABASE ex11b;
+USE ex11b;
+
+CREATE TABLE emp (ename VARCHAR(20), eid INTEGER, salary INTEGER, exp INTEGER);
+
+INSERT INTO emp VALUES ('kavi', 1, 40000, 7);
+INSERT INTO emp VALUES ('kar', 2, 30000, 6);
+INSERT INTO emp VALUES ('shanthi', 3, 40000, 9);
+
+START TRANSACTION;
+SELECT * FROM emp;
+
+SAVEPOINT ee;
+INSERT INTO emp VALUES ('uma', 6, 70000, 15);
+SELECT * FROM emp;                       -- 4 rows (uma added, not yet permanent)
+
+ROLLBACK WORK TO SAVEPOINT ee;
+SELECT * FROM emp;                       -- back to 3 rows
+
+COMMIT;
+
+
+-- ############################################################################
+-- EX. NO: 12   TRIGGERS
+-- ############################################################################
+
+-- ---------------- BEFORE INSERT and BEFORE UPDATE (employee table) ----------
+DROP DATABASE IF EXISTS ex12;
+CREATE DATABASE ex12;
+USE ex12;
+
+CREATE TABLE employee (
+  emp_id      INTEGER,
+  emp_name    VARCHAR(20),
+  city        VARCHAR(20),
+  designation VARCHAR(20),
+  salary      INTEGER,
+  perks       INTEGER
+);
+INSERT INTO employee VALUES
+  (1, 'david',  'delhi',     'manager',           12000, 855),
+  (2, 'shasah', 'mumbai',    'assistant manager', 13000, 853),
+  (3, 'sha',    'pune',      'sales manager',     11000, 850),
+  (4, 'jack',   'bangalore', 'designer',          14000, 854);
+SELECT * FROM employee;
+
+-- BEFORE INSERT: reduce salary by 400 for the new row if perks > 500
+-- (MySQL cannot UPDATE the same table inside its own trigger, so NEW.salary is changed)
+DELIMITER $$
+CREATE TRIGGER inst_trigger BEFORE INSERT ON employee
+FOR EACH ROW
+BEGIN
+  IF NEW.perks > 500 THEN
+    SET NEW.salary = NEW.salary - 400;
+  END IF;
+END$$
+DELIMITER ;
+
+INSERT INTO employee VALUES (5, 'mike', 'chennai', 'developer', 15500, 840);
+SELECT * FROM employee;                  -- mike's salary is 15100
+
+-- BEFORE UPDATE
+DELIMITER //
+CREATE TRIGGER updtrigger BEFORE UPDATE ON employee
+FOR EACH ROW
+BEGIN
+  IF NEW.salary = 500 THEN
+    SET NEW.salary = 10000;
+  ELSEIF NEW.salary > 500 THEN
+    SET NEW.salary = 15000;
+  END IF;
+END//
+DELIMITER ;
+
+UPDATE employee SET salary
